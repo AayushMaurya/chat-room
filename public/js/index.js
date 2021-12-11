@@ -38,3 +38,18 @@ document.querySelector('#submit-btn').addEventListener('click', function(e){
         console.log(m);
     });
 });
+
+document.querySelector('#send-location').addEventListener('click', function(e){
+    console.log("this will send geo location to every user");
+
+    if(!navigator.geolocation){
+        return alert("Geolocation is not supporte by your browser.");
+    }
+
+    // this will grab the current user location
+    navigator.geolocation.getCurrentPosition(function (position){
+        console.log(position);
+    }, function(){
+        alert("Unable to fetch location");
+    });
+});
