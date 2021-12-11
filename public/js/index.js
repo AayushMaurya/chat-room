@@ -11,10 +11,23 @@ ws.on('disconnect', function(){
 });
 
 ws.on("message", (message) => {
-    console.log(message);
+    // console.log(message);
     
     let li = document.createElement('li');
     li.innerText = `${message.from}: ${message.text}`;
+
+    document.querySelector('body').appendChild(li);
+});
+
+ws.on('locationMessage', (message) => {
+    console.log(message);
+    let li = document.createElement('li');
+    let a = document.createElement('a');
+    a.target = "_blank";
+    a.href = message.url;
+
+    a.innerText ='My current location.';
+    li.appendChild(a);
 
     document.querySelector('body').appendChild(li);
 });
@@ -48,7 +61,11 @@ document.querySelector('#send-location').addEventListener('click', function(e){
 
     // this will grab the current user location
     navigator.geolocation.getCurrentPosition(function (position){
-        console.log(position);
+        // console.log(position);
+        ws.emit('createLocationMessage', {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+        });
     }, function(){
         alert("Unable to fetch location");
     });

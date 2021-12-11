@@ -21,7 +21,7 @@ app.get("/", (req, res) => {
 //     res.sendFile(__dirname + "/../public/js/index.js");
 // });
 
-const {generateMessage} = require("./utils/message");
+const {generateMessage, generateLocationMessage} = require("./utils/message");
 
 let io = socketio(server);
 
@@ -54,10 +54,14 @@ io.on("connection", (con)=>{
     });
 
     con.on("createMessage", (message, callBack) => {
-        console.log(message);
+        // console.log(message);
         con.broadcast.emit('message', generateMessage(message.from, message.text));
 
         callBack("The message is sent to everyone");
+    });
+
+    con.on("createLocationMessage", (coords) => {
+        con.broadcast.emit("locationMessage", generateLocationMessage('Admin', coords.lat, coords.lng));
     });
 
 });
