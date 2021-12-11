@@ -13,9 +13,9 @@ app.use(express.static(publicPath));
 
 // express.static will get all the required file of static website from the path given 
 // no need to mention every file again
-// app.get("/", (req, res) => {
-//     res.sendFile(__dirname + "/public/index.html")
-// });
+app.get("/", (req, res) => {
+    res.sendFile(__dirname + "/public/index.html")
+});
 
 // app.get("/javascript", (req, res) => {
 //     res.sendFile(__dirname + "/../public/js/index.js");
