@@ -1,5 +1,11 @@
 let ws = io();
 
+function scrollToBottom(){
+    let message = document.getElementById('message-box').lastElementChild;
+
+    message.scrollIntoView();
+}
+
 let btnBroadcast = document.getElementById("btnBroadcast");
 
 ws.on('connect', function(){
@@ -16,7 +22,9 @@ ws.on("message", (message) => {
     let li = document.createElement('li');
     li.innerText = `${message.from}: ${message.text}`;
 
-    document.querySelector('body').appendChild(li);
+    document.querySelector('#message-box').appendChild(li);
+
+    scrollToBottom();       // to scroll to bottom of the message box
 });
 
 ws.on('locationMessage', (message) => {
@@ -29,7 +37,7 @@ ws.on('locationMessage', (message) => {
     a.innerText ='My current location.';
     li.appendChild(a);
 
-    document.querySelector('body').appendChild(li);
+    document.querySelector('#message-box').appendChild(li);
 });
 
 btnBroadcast.addEventListener('click', function() {
