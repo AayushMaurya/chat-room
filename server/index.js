@@ -21,16 +21,28 @@ app.get("/", (req, res) => {
 //     res.sendFile(__dirname + "/../public/js/index.js");
 // });
 
-const {generateMessage, generateLocationMessage} = require("./utils/message");
+const { generateMessage, generateLocationMessage } = require("./utils/message");
+const { isRealString } = require("./utils/isRealString");
+const { param } = require('express/lib/request');
 
 let io = socketio(server);
 
-io.on("connection", (con)=>{
+io.on("connection", (con) => {
     console.log("A user connected");
 
-    con.emit("message", generateMessage('Admin', "Greetings from the server"));
+    con.on("join", (params, callBack) => {
+        if (!isRealString(params.displayName) || !isRealString(params.roomName))
+            callBack("Input fields are not valid");
+        else {
+            con.join(params.roomName);          // this will join the connection to room mentioned
+            // it will create one if it does not exist
+            callBack();
 
-    con.broadcast.emit("message", generateMessage('Admin', 'A new user joined'));
+            con.emit("message", generateMessage('Admin', "Greetings from the server"));
+
+            con.broadcast.emit("message", generateMessage('Admin', 'A new user joined'));
+        }
+    });
 
     con.on('disconnect', () => {
         console.log("A user disconnected");
@@ -66,5 +78,5 @@ io.on("connection", (con)=>{
 
 });
 
-server.listen(port, ()=>console.log("server listening to port ", port));
+server.listen(port, () => console.log("server listening to port ", port));
 

@@ -9,7 +9,21 @@ function scrollToBottom(){
 let btnBroadcast = document.getElementById("btnBroadcast");
 
 ws.on('connect', function(){
-    console.log("connected to server")
+    console.log("connected to server");
+
+    let substr = window.location.search.substring(1);
+    let paras = JSON.parse('{"' + decodeURI(substr).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}')
+
+    // join in a predefined method
+    ws.emit("join", paras, function(err){
+        if(err){
+            alert(err);
+            window.location.href = '/';
+        }
+        else{
+            console.log("sucessfully logged in");
+        }
+    });
 });
 
 ws.on('disconnect', function(){
