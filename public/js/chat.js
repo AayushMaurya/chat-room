@@ -6,8 +6,6 @@ function scrollToBottom(){
     message.scrollIntoView();
 }
 
-let btnBroadcast = document.getElementById("btnBroadcast");
-
 ws.on('connect', function(){
     console.log("connected to server");
 
@@ -54,13 +52,10 @@ ws.on('locationMessage', (message) => {
     document.querySelector('#message-box').appendChild(li);
 });
 
-btnBroadcast.addEventListener('click', function() {
-    ws.emit("broadcastMessage", {
-    from: "aayush",
-    text: "this is a broadcast message fro aayush"
-   }, function(m){
-       console.log("got it ", m);
-   });
+ws.on('updateUsersList', (ulist) => {
+    console.log("Updated list = ", ulist);
+
+    
 });
 
 document.querySelector('#submit-btn').addEventListener('click', function(e){

@@ -23,9 +23,12 @@ app.get("/", (req, res) => {
 
 const { generateMessage, generateLocationMessage } = require("./utils/message");
 const { isRealString } = require("./utils/isRealString");
+const { Users } = require("./utils/users");
 const { param } = require('express/lib/request');
 
 let io = socketio(server);
+
+let users = new Users();        // creating object of Users class
 
 io.on("connection", (con) => {
     console.log("A user connected");
@@ -34,35 +37,33 @@ io.on("connection", (con) => {
         if (!isRealString(params.displayName) || !isRealString(params.roomName))
             callBack("Input fields are not valid");
         else {
+
             con.join(params.roomName);          // this will join the connection to room mentioned
             // it will create one if it does not exist
+
+            // if user already exist remvove it and then add again
+            users.removeUser(con.id);
+
+            users.addUser(con.id, params.displayName, params.roomName);
+
+            con.emit("message", generateMessage('Admin', `Welcom to ${params.roomName}`));
+
+            // broadcast new users list to all the user of particular room
+            io.to(params.roomName).emit('updateUsersList', users.getUserList(params.roomName));
+
             callBack();
-
-            con.emit("message", generateMessage('Admin', "Greetings from the server"));
-
-            con.broadcast.emit("message", generateMessage('Admin', 'A new user joined'));
         }
     });
 
     con.on('disconnect', () => {
-        console.log("A user disconnected");
-    });
+        let user = users.removeUser(con.id);
 
-    con.on("broadcastMessage", (message, callBack) => {
-        console.log(message);
+        if(user){
+            console.log(`${user.name} get disconnected`);
 
-        // this will send broadcast message to everyone including itself
-        io.emit('message', generateMessage(message.from, message.text));
-
-        // this will send broadcast message to everyone except itslef
-        // con.broadcast.emit('message', {
-        //     from: message.from,
-        //     type: "broadcast",
-        //     text: message.text,
-        //     createdAt: new Date().getTime()
-        // });
-
-        callBack('The message is broadcast');       // this call bcak function will be called at the client who asked for broadcast message
+            io.to(user.room).emit('updateUsersList', users.getUserList(user.room));
+            io.to(user.room).emit('message', generateMessage('Admin', `${user.name} left`));
+        }
     });
 
     con.on("createMessage", (message, callBack) => {
@@ -79,4 +80,3 @@ io.on("connection", (con) => {
 });
 
 server.listen(port, () => console.log("server listening to port ", port));
-
